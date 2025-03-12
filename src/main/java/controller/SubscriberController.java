@@ -2,15 +2,11 @@ package controller;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import view.Main;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileNotFoundException;
 
 public class SubscriberController implements ActionListener {
-
     private Main viewMain;
-
     public SubscriberController(Main viewMain) {
         this.viewMain = viewMain;
     }

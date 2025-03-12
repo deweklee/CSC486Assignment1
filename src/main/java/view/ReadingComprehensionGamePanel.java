@@ -4,7 +4,6 @@ import model.Blackboard;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -12,13 +11,12 @@ import java.util.List;
 import java.util.Random;
 
 public class ReadingComprehensionGamePanel extends JPanel implements PropertyChangeListener {
-
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
 
     }
 
-    private class ReadingItem {
+    private static class ReadingItem {
         String passage;
         String question;
         String[] options;
@@ -33,14 +31,12 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
     }
 
     // CardLayout for switching between screens.
-    private CardLayout cardLayout;
-    private JPanel cardPanel;
+    private final CardLayout cardLayout;
+    private final JPanel cardPanel;
 
     // Color selection components.
     private JPanel colorSelectionPanel;
     private JRadioButton rbWhiteOnBlack, rbBlackOnWhite, rbBlackOnWarm;
-    private ButtonGroup colorGroup;
-    private JButton startButton;
 
     // Combined reading and question panel components.
     private JPanel readingAndQuestionPanel;
@@ -103,7 +99,7 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
         rbWhiteOnBlack.setSelected(true);
 
         // Group radio buttons.
-        colorGroup = new ButtonGroup();
+        ButtonGroup colorGroup = new ButtonGroup();
         colorGroup.add(rbWhiteOnBlack);
         colorGroup.add(rbBlackOnWhite);
         colorGroup.add(rbBlackOnWarm);
@@ -113,41 +109,39 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
         rbBlackOnWarm.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Start button applies the chosen color scheme and switches to the reading screen.
-        startButton = new JButton("Start");
+        JButton startButton = new JButton("Start");
         startButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        startButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                ArrayList<Object> values = new ArrayList<>();
-                values.add(System.currentTimeMillis());
-                values.add("chose color option");
+        startButton.addActionListener(e -> {
+            ArrayList<Object> values = new ArrayList<>();
+            values.add(System.currentTimeMillis());
+            values.add("chose color option");
 
-                applyColorScheme();
-                values.add(colorToString(bgColor));
-                values.add(colorToString(fgColor));
+            applyColorScheme();
+            values.add(colorToString(bgColor));
+            values.add(colorToString(fgColor));
 
-                // Randomly select a reading item.
-                Random random = new Random();
-                int index = random.nextInt(readingItems.size());
-                currentItem = readingItems.get(index);
-                // Set the passage text.
-                passageTextArea.setText(currentItem.passage);
+            // Randomly select a reading item.
+            Random random = new Random();
+            int index = random.nextInt(readingItems.size());
+            currentItem = readingItems.get(index);
+            // Set the passage text.
+            passageTextArea.setText(currentItem.passage);
 
-                values.add(index);
-                try {
-                    Blackboard.getInstance().addValue(true, values.toArray());
-                } catch (Exception ex) {
-                    System.out.println("failed to send color option value to blackboard");
-                }
-
-                // Reset UI components.
-                finishedReadingButton.setVisible(true);
-                questionPanel.setVisible(false);
-                resultLabel.setText("");
-                submitButton.setEnabled(true);
-                backToHomeButton.setVisible(false);
-                // Switch to the reading and question panel.
-                cardLayout.show(cardPanel, "READING_AND_QUESTION");
+            values.add(index);
+            try {
+                Blackboard.getInstance().addValue(true, values.toArray());
+            } catch (Exception ex) {
+                System.out.println("failed to send color option value to blackboard");
             }
+
+            // Reset UI components.
+            finishedReadingButton.setVisible(true);
+            questionPanel.setVisible(false);
+            resultLabel.setText("");
+            submitButton.setEnabled(true);
+            backToHomeButton.setVisible(false);
+            // Switch to the reading and question panel.
+            cardLayout.show(cardPanel, "READING_AND_QUESTION");
         });
 
         // Add components with spacing.
@@ -179,38 +173,36 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
         // Finished Reading button.
         finishedReadingButton = new JButton("Finished Reading");
         finishedReadingButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        finishedReadingButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+        finishedReadingButton.addActionListener(e -> {
 
-                // Set up the question panel with the current item's question and answer options.
-                ArrayList<Object> values = new ArrayList<>();
-                values.add(System.currentTimeMillis());
-                values.add("finished reading text");
-                values.add(colorToString(bgColor));
-                values.add(colorToString(fgColor));
+            // Set up the question panel with the current item's question and answer options.
+            ArrayList<Object> values = new ArrayList<>();
+            values.add(System.currentTimeMillis());
+            values.add("finished reading text");
+            values.add(colorToString(bgColor));
+            values.add(colorToString(fgColor));
 
-                try {
-                    Blackboard.getInstance().addValue(true, values.toArray());
-                } catch (Exception ex) {
-                    System.out.println("failed to send finished reading text value to blackboard");
-                }
-
-                questionLabel.setText(currentItem.question);
-                questionLabel.setFont(new Font("Verdana", Font.PLAIN, 20));
-                for (int i = 0; i < optionButtons.length; i++) {
-                    if (i < currentItem.options.length) {
-                        optionButtons[i].setText(currentItem.options[i]);
-                        optionButtons[i].setFont(new Font("Verdana", Font.PLAIN, 18));
-                        optionButtons[i].setVisible(true);
-                    } else {
-                        optionButtons[i].setVisible(false);
-                    }
-                }
-                optionsGroup.clearSelection();
-                // Hide the "Finished Reading" button and display the question panel below the passage.
-                finishedReadingButton.setVisible(false);
-                questionPanel.setVisible(true);
+            try {
+                Blackboard.getInstance().addValue(true, values.toArray());
+            } catch (Exception ex) {
+                System.out.println("failed to send finished reading text value to blackboard");
             }
+
+            questionLabel.setText(currentItem.question);
+            questionLabel.setFont(new Font("Verdana", Font.PLAIN, 20));
+            for (int i = 0; i < optionButtons.length; i++) {
+                if (i < currentItem.options.length) {
+                    optionButtons[i].setText(currentItem.options[i]);
+                    optionButtons[i].setFont(new Font("Verdana", Font.PLAIN, 18));
+                    optionButtons[i].setVisible(true);
+                } else {
+                    optionButtons[i].setVisible(false);
+                }
+            }
+            optionsGroup.clearSelection();
+            // Hide the "Finished Reading" button and display the question panel below the passage.
+            finishedReadingButton.setVisible(false);
+            questionPanel.setVisible(true);
         });
 
         // Create the question panel.
@@ -235,43 +227,41 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
         // Submit Answer button.
         submitButton = new JButton("Submit Answer");
         submitButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        submitButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+        submitButton.addActionListener(e -> {
 
-                ArrayList<Object> values = new ArrayList<>();
-                values.add(System.currentTimeMillis());
-                values.add("answer submitted");
-                values.add(colorToString(bgColor));
-                values.add(colorToString(fgColor));
+            ArrayList<Object> values = new ArrayList<>();
+            values.add(System.currentTimeMillis());
+            values.add("answer submitted");
+            values.add(colorToString(bgColor));
+            values.add(colorToString(fgColor));
 
-                int selectedIndex = -1;
-                for (int i = 0; i < optionButtons.length; i++) {
-                    if (optionButtons[i].isSelected()) {
-                        selectedIndex = i;
-                        break;
-                    }
+            int selectedIndex = -1;
+            for (int i = 0; i < optionButtons.length; i++) {
+                if (optionButtons[i].isSelected()) {
+                    selectedIndex = i;
+                    break;
                 }
-                if (selectedIndex == -1) {
-                    JOptionPane.showMessageDialog(ReadingComprehensionGamePanel.this, "Please select an answer.");
-                    return;
-                }
-                if (selectedIndex == currentItem.correctOption) {
-                    resultLabel.setText("Correct!");
-                    values.add("correct");
-                } else {
-                    resultLabel.setText("Incorrect. The correct answer is: "
-                            + currentItem.options[currentItem.correctOption]);
-                    values.add("incorrect");
-                }
-                resultLabel.setFont(new Font("Verdana", Font.PLAIN, 15));
-                // Disable further submissions and reveal the back button.
-                submitButton.setEnabled(false);
-                backToHomeButton.setVisible(true);
-                try {
-                    Blackboard.getInstance().addValue(true, values.toArray());
-                } catch (Exception ex) {
-                    System.out.println("failed to send answer submission value to blackboard");
-                }
+            }
+            if (selectedIndex == -1) {
+                JOptionPane.showMessageDialog(ReadingComprehensionGamePanel.this, "Please select an answer.");
+                return;
+            }
+            if (selectedIndex == currentItem.correctOption) {
+                resultLabel.setText("Correct!");
+                values.add("correct");
+            } else {
+                resultLabel.setText("Incorrect. The correct answer is: "
+                        + currentItem.options[currentItem.correctOption]);
+                values.add("incorrect");
+            }
+            resultLabel.setFont(new Font("Verdana", Font.PLAIN, 15));
+            // Disable further submissions and reveal the back button.
+            submitButton.setEnabled(false);
+            backToHomeButton.setVisible(true);
+            try {
+                Blackboard.getInstance().addValue(true, values.toArray());
+            } catch (Exception ex) {
+                System.out.println("failed to send answer submission value to blackboard");
             }
         });
 
@@ -282,16 +272,12 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
         backToHomeButton = new JButton("Back to Home");
         backToHomeButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         backToHomeButton.setVisible(false);
-        backToHomeButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // Return to the color selection screen.
-                cardLayout.show(cardPanel, "COLOR_SELECTION");
-            }
+        backToHomeButton.addActionListener(e -> {
+            // Return to the color selection screen.
+            cardLayout.show(cardPanel, "COLOR_SELECTION");
         });
 
         // Arrange components in the question panel.
-//        questionPanel.add(Box.createVerticalStrut(10));
-//        questionPanel.add(questionLabel);
         questionPanel.add(Box.createVerticalStrut(10));
         questionPanel.add(submitButton);
         questionPanel.add(Box.createVerticalStrut(10));
@@ -333,8 +319,7 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
         if (comp instanceof JButton) return;
         comp.setBackground(bgColor);
         comp.setForeground(fgColor);
-        if (comp instanceof AbstractButton) {
-            AbstractButton btn = (AbstractButton) comp;
+        if (comp instanceof AbstractButton btn) {
             btn.setOpaque(true);
             btn.setBackground(bgColor);
             btn.setForeground(fgColor);
@@ -370,15 +355,16 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
         // Sample list of 20 coding questions
 
         readingItems.add(new ReadingItem(
-                "public class ConcatTest {\n" +
-                        "    public static void main(String[] args) {\n" +
-                        "        int a = 2;\n" +
-                        "        int b = 3;\n" +
-                        "        System.out.println(a + b + \" equals \" + a + b);\n" +
-                        "    }\n" +
-                        "}",
+                """
+                        public class ConcatTest {
+                            public static void main(String[] args) {
+                                int a = 2;
+                                int b = 3;
+                                System.out.println(a + b + " equals " + a + b);
+                            }
+                        }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "5 equals 23",
                         "23 equals 23",
                         "5 equals 5",
@@ -388,20 +374,21 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
         ));
 
         readingItems.add(new ReadingItem(
-                "public class LoopComplex {\n" +
-                        "    public static void main(String[] args) {\n" +
-                        "        int sum = 0;\n" +
-                        "        for (int i = 1; i < 5; i++) {\n" +
-                        "            for (int j = i; j < 5; j++) {\n" +
-                        "                if (j % 2 == 0) continue;\n" +
-                        "                sum += i * j;\n" +
-                        "            }\n" +
-                        "        }\n" +
-                        "        System.out.println(sum);\n" +
-                        "    }\n" +
-                        "}",
+                """
+                        public class LoopComplex {
+                            public static void main(String[] args) {
+                                int sum = 0;
+                                for (int i = 1; i < 5; i++) {
+                                    for (int j = i; j < 5; j++) {
+                                        if (j % 2 == 0) continue;
+                                        sum += i * j;
+                                    }
+                                }
+                                System.out.println(sum);
+                            }
+                        }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "14",
                         "19",
                         "21",
@@ -411,17 +398,18 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
         ));
 
         readingItems.add(new ReadingItem(
-                "public class RecursionTest {\n" +
-                        "    public static int mystery(int n) {\n" +
-                        "        if (n <= 1) return n;\n" +
-                        "        return mystery(n-1) + mystery(n-2);\n" +
-                        "    }\n" +
-                        "    public static void main(String[] args) {\n" +
-                        "        System.out.println(mystery(5));\n" +
-                        "    }\n" +
-                        "}",
+                """
+                        public class RecursionTest {
+                            public static int mystery(int n) {
+                                if (n <= 1) return n;
+                                return mystery(n-1) + mystery(n-2);
+                            }
+                            public static void main(String[] args) {
+                                System.out.println(mystery(5));
+                            }
+                        }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "3",
                         "8",
                         "5",
@@ -431,15 +419,16 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
         ));
 
         readingItems.add(new ReadingItem(
-                "public class PrecedenceTest {\n" +
-                        "    public static void main(String[] args) {\n" +
-                        "        int a = 2;\n" +
-                        "        int b = 3;\n" +
-                        "        System.out.println(a + b * 2 + \" \" + (a + b) * 2);\n" +
-                        "    }\n" +
-                        "}",
+                """
+                        public class PrecedenceTest {
+                            public static void main(String[] args) {
+                                int a = 2;
+                                int b = 3;
+                                System.out.println(a + b * 2 + " " + (a + b) * 2);
+                            }
+                        }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "10 8",
                         "8 8",
                         "10 10",
@@ -458,7 +447,7 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
                             }
                         }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "1",
                         "2",
                         "3",
@@ -483,7 +472,7 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
                             }
                         }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "1 2 3 4 ",
                         "4 3 2 1 ",
                         "1 2 3 4",
@@ -504,7 +493,7 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
                             }
                         }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "6",
                         "4",
                         "3",
@@ -527,7 +516,7 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
                             }
                         }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "B",
                         "ABC",
                         "BD",
@@ -546,7 +535,7 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
                             }
                         }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "Hello",
                         "Hello World",
                         "World",
@@ -567,7 +556,7 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
                             }
                         }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "24",
                         "48",
                         "36",
@@ -592,7 +581,7 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
                             }
                         }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "int int double ",
                         "double double double ",
                         "int double double ",
@@ -618,7 +607,7 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
                             }
                         }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "ACBDE",
                         "ABCDE",
                         "AD",
@@ -638,7 +627,7 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
                             }
                         }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "true false",
                         "false false",
                         "true true",
@@ -655,7 +644,7 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
                             }
                         }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "0",
                         "-1",
                         "1",
@@ -675,7 +664,7 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
                             }
                         }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "true false",
                         "true true",
                         "false true",
@@ -696,7 +685,7 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
                             }
                         }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "5 3 2",
                         "1 3 6",
                         "1 7 2",
@@ -715,7 +704,7 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
                             }
                         }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "11",
                         "10",
                         "12",
@@ -740,7 +729,7 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
                             }
                         }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "15",
                         "13",
                         "10",
@@ -760,7 +749,7 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
                             }
                         }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "[apple, banana, cherry]",
                         "[banana, apple, cherry]",
                         "[banana, cherry, apple]",
@@ -784,7 +773,7 @@ public class ReadingComprehensionGamePanel extends JPanel implements PropertyCha
                             }
                         }""",
                 "What is printed when this code is executed?",
-                new String[] {
+                new String[]{
                         "long",
                         "byte",
                         "Error",

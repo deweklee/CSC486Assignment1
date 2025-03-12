@@ -1,15 +1,14 @@
 package model;
 
 import org.json.JSONObject;
-
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.FileWriter;
 import java.math.BigDecimal;
 import java.util.LinkedList;
+import java.util.Objects;
 
 public class Blackboard extends PropertyChangeSupport {
-
     private String outputFile;
     private static Blackboard instance;
     private LinkedList<JSONObject> samples;
@@ -27,34 +26,32 @@ public class Blackboard extends PropertyChangeSupport {
     }
 
     public void addValue(Boolean paused, Object value) {
-        System.out.println(value.toString());
         try {
             JSONObject obj = new JSONObject(value.toString());
             String type = obj.getString("Type");
-            if (type == "PAD") {
+            if (Objects.equals(type, "PAD")) {
                 addPADData(obj);
-            } else if (type == "AFFECT") {
+            } else if (Objects.equals(type, "AFFECT")) {
                 addAffectData(obj);
             }
             samples.add(obj);
         } catch(Exception e) {
             // if json fails, value could be coming from GUI instead
-            System.out.println("blackboard failed add json value");
+            System.out.println("blackboard failed add json");
             try {
                 addValueArray(value);
             } catch (Exception ex) {
                 System.out.println("blackboard failed to add value array");
             }
         }
-
     }
 
     private void addValueArray(Object value) {
         try {
             Object[] valueArray = (Object[]) value;
-            String csvString = "";
-            for(int i = 0; i< valueArray.length; i++) {
-                csvString += valueArray[i] + ",";
+            StringBuilder csvString = new StringBuilder();
+            for (Object o : valueArray) {
+                csvString.append(o).append(",");
             }
 
             File file = new File(outputFile);
@@ -65,13 +62,14 @@ public class Blackboard extends PropertyChangeSupport {
             System.out.println("Error processing quiz input");
         }
     }
+
     private void addPADData(JSONObject obj) {
         try {
             String Type = obj.getString("Type");
             double p = obj.getDouble("P");
             double a = obj.getDouble("A");
             double d = obj.getDouble("D");
-            BigDecimal time = new BigDecimal(obj.getDouble("time"));
+            BigDecimal time = BigDecimal.valueOf(obj.getDouble("time"));
 
             String csvString =
                     Type + "," +
@@ -88,6 +86,7 @@ public class Blackboard extends PropertyChangeSupport {
             System.out.println("failed to read PAD data");
         }
     }
+
     private void addAffectData(JSONObject obj) {
         try {
             String Type = obj.getString("Type");
@@ -103,7 +102,7 @@ public class Blackboard extends PropertyChangeSupport {
             String excitement = obj.getString("Excitement");
             String activeStress = obj.getString("Active Stress");
             String stress = obj.getString("Stress");
-            BigDecimal time = new BigDecimal(obj.getDouble("time"));
+            BigDecimal time = BigDecimal.valueOf(obj.getDouble("time"));
 
             String csvString =
                     Type + "," +
@@ -123,11 +122,12 @@ public class Blackboard extends PropertyChangeSupport {
             System.out.println("failed to read Affect data");
         }
     }
+
     public void setOutputFile(String filename) {
         this.outputFile = filename;
     }
+
     public void statusUpdate(String key, String update) {
         firePropertyChange(key, null, update);
     }
 }
-

@@ -3,7 +3,6 @@ package model;
 import org.eclipse.paho.client.mqttv3.*;
 
 public class Subscriber implements Runnable, MqttCallback {
-
     private boolean wait = true;
     private final static String STATUS_KEY = "subPanel";
     private final static String BROKER = "tcp://test.mosquitto.org:1883";
@@ -42,20 +41,21 @@ public class Subscriber implements Runnable, MqttCallback {
     }
 
     public void disconnect() throws MqttException {
-        if (client == null || (client != null && !client.isConnected())) {
+        if (client == null || !client.isConnected()) {
             Blackboard.getInstance().statusUpdate(STATUS_KEY, "Subscriber is already disconnected");
         } else {
             client.disconnect();
             Blackboard.getInstance().statusUpdate(STATUS_KEY, "Successfully Disconnected");
         }
     }
+
     @Override
     public void connectionLost(Throwable throwable) {
         Blackboard.getInstance().statusUpdate(STATUS_KEY, "Connection Lost");
     }
 
     @Override
-    public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
+    public void messageArrived(String s, MqttMessage mqttMessage) {
         if (!wait) {
             Blackboard.getInstance().statusUpdate(STATUS_KEY, "New Message");
         }
