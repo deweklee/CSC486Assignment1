@@ -1,13 +1,16 @@
 package model;
 
 import org.eclipse.paho.client.mqttv3.*;
+import org.json.JSONException;
+
+import java.io.IOException;
 
 public class Subscriber implements Runnable, MqttCallback {
 
     private boolean wait = true;
     private final static String STATUS_KEY = "subPanel";
     private final static String BROKER = "tcp://test.mosquitto.org:1883";
-    private final static String TOPIC = "javiergs/tobii/gazedata";
+    private final static String TOPIC = "jgs/unity/test";
     private final static String CLIENT_ID = "subscriber-" + System.currentTimeMillis();
     private MqttClient client;
     @Override
@@ -55,10 +58,10 @@ public class Subscriber implements Runnable, MqttCallback {
     }
 
     @Override
-    public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
-        if (!wait) {
-            Blackboard.getInstance().statusUpdate(STATUS_KEY, "New Message");
-        }
+    public void messageArrived(String s, MqttMessage mqttMessage) throws JSONException, IOException {
+//        if (!wait) {
+//            Blackboard.getInstance().statusUpdate(STATUS_KEY, "New Message");
+//        }
         Blackboard.getInstance().addValue(wait, new String(mqttMessage.getPayload()));
 
     }

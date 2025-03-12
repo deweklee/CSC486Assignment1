@@ -82,34 +82,27 @@ public class Main extends JFrame {
         return menuBar;
     }
 
+
     public Main() throws InterruptedException {
-        publisher = new Publisher();
-        Thread modelThread = new Thread(publisher);
-        modelThread.start();
+//        publisher = new Publisher();
+//        Thread modelThread = new Thread(publisher);
+//        modelThread.start();
 
         subscriber = new Subscriber();
         Thread subThread = new Thread(subscriber);
         subThread.sleep(1000);
         subThread.start();
 
-        setJMenuBar(createPublisherMenuBar());
-        PublisherViewPanel pubCentralPanel = new PublisherViewPanel();
+//        DigitSpanViewPanel subCentralPanel = new DigitSpanViewPanel();
+//        SubscriberViewPanel subCentralPanel = new SubscriberViewPanel();
+//        CircleViewPanel subCentralPanel = new CircleViewPanel();
+        ReadingComprehensionGamePanel subCentralPanel = new ReadingComprehensionGamePanel();
+
+        setJMenuBar(createSubscriberMenuBar());
+
         setLayout(new BorderLayout());
-        add(pubCentralPanel, BorderLayout.CENTER);
-        Blackboard.getInstance().addPropertyChangeListener("pubPanel", pubCentralPanel);
-
-        secondFrame = new JFrame("Second Window");
-
-        secondFrame.setJMenuBar(createSubscriberMenuBar());
-        SubscriberViewPanel subCentralPanel = new SubscriberViewPanel();
-        secondFrame.setLayout(new BorderLayout());
-        secondFrame.add(subCentralPanel, BorderLayout.CENTER);
-        Blackboard.getInstance().addPropertyChangeListener("subPanel",subCentralPanel);
-        secondFrame.setSize(800, 600);
-        secondFrame.setLocationRelativeTo(null);
-        secondFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        secondFrame.setVisible(true);
-        secondFrame.setTitle("Subscriber");
+        add(subCentralPanel, BorderLayout.CENTER);
+        Blackboard.getInstance().addPropertyChangeListener("subPanel", subCentralPanel);
 
     }
     public void about() {
@@ -150,11 +143,12 @@ public class Main extends JFrame {
     }
     public static void main(String[] args) throws InterruptedException {
         Main main1 = new Main();
+        Blackboard.getInstance().setOutputFile("./output/output-" + System.currentTimeMillis() + ".csv");
         main1.setSize(800, 600);
         main1.setLocationRelativeTo(null);
         main1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         main1.setVisible(true);
-        main1.setTitle("Publisher");
+        main1.setTitle("Subscriber");
     }
 
 

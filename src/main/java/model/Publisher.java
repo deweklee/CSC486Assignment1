@@ -11,7 +11,7 @@ public class Publisher implements Runnable {
 
     private final static String BROKER = "tcp://test.mosquitto.org:1883";
     private final static String TOPIC = "csc486/assgn1";
-    private final static String CLIENT_ID = "publisher-" + System.currentTimeMillis();
+    private final static String CLIENT_ID = "publisher" + System.currentTimeMillis();
     private final static String STATUS_KEY = "pubPanel";
     private static volatile BufferedReader file = null;
     private boolean wait = true;
