@@ -1,18 +1,18 @@
 package model;
 
-
 import org.json.JSONObject;
 
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.FileWriter;
+import java.math.BigDecimal;
 import java.util.LinkedList;
 
 public class Blackboard extends PropertyChangeSupport {
 
-    private String outputFile = "./output/output-" + System.currentTimeMillis() + ".csv";
+    private String outputFile;
     private static Blackboard instance;
-    private LinkedList<String> samples;
+    private LinkedList<JSONObject> samples;
 
     private Blackboard() {
         super(new Object());
@@ -26,49 +26,108 @@ public class Blackboard extends PropertyChangeSupport {
         return instance;
     }
 
-    public void addValue(Boolean paused, Object value)  {
-        samples.add(value.toString());
-        if(!paused){
-            firePropertyChange("subPanel", null, value);
-        }
+    public void addValue(Boolean paused, Object value) {
+        System.out.println(value.toString());
         try {
             JSONObject obj = new JSONObject(value.toString());
+            String type = obj.getString("Type");
+            if (type == "PAD") {
+                addPADData(obj);
+            } else if (type == "AFFECT") {
+                addAffectData(obj);
+            }
+            samples.add(obj);
+        } catch(Exception e) {
+            // if json fails, value could be coming from GUI instead
+            System.out.println("blackboard failed add json value");
+            try {
+                addValueArray(value);
+            } catch (Exception ex) {
+                System.out.println("blackboard failed to add value array");
+            }
+        }
 
-            int systemTime = obj.getInt("system_time");
-            int deviceTime = obj.getInt("device_time");
+    }
 
-            // Use optDouble with NaN as default value
-            double leftX = obj.getJSONObject("left_eye").optDouble("x", Double.NaN);
-            double leftY = obj.getJSONObject("left_eye").optDouble("y", Double.NaN);
-            double rightX = obj.getJSONObject("right_eye").optDouble("x", Double.NaN);
-            double rightY = obj.getJSONObject("right_eye").optDouble("y", Double.NaN);
-
-            // Convert NaN values to a string "NaN" for CSV output
-            String csvString =
-                    systemTime + "," +
-                            deviceTime + "," +
-                            (Double.isNaN(leftX) ? "NaN" : leftX) + "," +
-                            (Double.isNaN(leftY) ? "NaN" : leftY) + "," +
-                            (Double.isNaN(rightX) ? "NaN" : rightX) + "," +
-                            (Double.isNaN(rightY) ? "NaN" : rightY);
+    private void addValueArray(Object value) {
+        try {
+            Object[] valueArray = (Object[]) value;
+            String csvString = "";
+            for(int i = 0; i< valueArray.length; i++) {
+                csvString += valueArray[i] + ",";
+            }
 
             File file = new File(outputFile);
             FileWriter fileWriter = new FileWriter(file, true);
-
-            // Write CSV string followed by a newline
             fileWriter.write(csvString + System.lineSeparator());
-
-            // Close file writer
             fileWriter.close();
-        } catch (Exception e) {
-            System.out.println("Error processing JSON: " + e.getLocalizedMessage());
-            e.printStackTrace();  // Print full stack trace for debugging
+        } catch (Exception ex) {
+            System.out.println("Error processing quiz input");
         }
     }
+    private void addPADData(JSONObject obj) {
+        try {
+            String Type = obj.getString("Type");
+            double p = obj.getDouble("P");
+            double a = obj.getDouble("A");
+            double d = obj.getDouble("D");
+            BigDecimal time = new BigDecimal(obj.getDouble("time"));
 
+            String csvString =
+                    Type + "," +
+                            time + "," +
+                            (Double.isNaN(p) ? "NaN" : p) + "," +
+                            (Double.isNaN(a) ? "NaN" : a) + "," +
+                            (Double.isNaN(d) ? "NaN" : d) + ",";
+
+            File file = new File(outputFile);
+            FileWriter fileWriter = new FileWriter(file, true);
+            fileWriter.write(csvString + System.lineSeparator());
+            fileWriter.close();
+        } catch (Exception e) {
+            System.out.println("failed to read PAD data");
+        }
+    }
+    private void addAffectData(JSONObject obj) {
+        try {
+            String Type = obj.getString("Type");
+            String activeInterest = obj.getString("Active Interest");
+            String interest = obj.getString("Interest");
+            String activeRelaxation = obj.getString("Active Relaxation");
+            String relaxation = obj.getString("Relaxation");
+            String activeAttentionOrFocus = obj.getString("Active Attention or Focus");
+            String attentionOrFocus = obj.getString("Attention or Focus");
+            String activeEngagement = obj.getString("Active Engagement");
+            String engagement = obj.getString("Engagement");
+            String activeExcitement = obj.getString("Active Excitement");
+            String excitement = obj.getString("Excitement");
+            String activeStress = obj.getString("Active Stress");
+            String stress = obj.getString("Stress");
+            BigDecimal time = new BigDecimal(obj.getDouble("time"));
+
+            String csvString =
+                    Type + "," +
+                            time + "," +
+                            activeInterest + "," + interest + "," +
+                            activeRelaxation + "," + relaxation + "," +
+                            activeAttentionOrFocus + "," + attentionOrFocus + "," +
+                            activeEngagement + "," + engagement + "," +
+                            activeExcitement + "," + excitement + "," +
+                            activeStress + "," + stress + ",";
+
+            File file = new File(outputFile);
+            FileWriter fileWriter = new FileWriter(file, true);
+            fileWriter.write(csvString + System.lineSeparator());
+            fileWriter.close();
+        } catch (Exception e) {
+            System.out.println("failed to read Affect data");
+        }
+    }
+    public void setOutputFile(String filename) {
+        this.outputFile = filename;
+    }
     public void statusUpdate(String key, String update) {
         firePropertyChange(key, null, update);
     }
 }
-
 

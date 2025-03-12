@@ -21,20 +21,20 @@ public class SubscriberController implements ActionListener {
             viewMain.about();
         } else if (e.getActionCommand().equals("Start")) {
             System.out.println("Start");
-            viewMain.pauseThread(false,false);
+            viewMain.pauseThread(false);
         } else if (e.getActionCommand().equals("Stop")) {
             System.out.println("Stop");
-            viewMain.pauseThread(false,true);
+            viewMain.pauseThread(true);
         } else if (e.getActionCommand().equals("Connect")) {
             System.out.println("Connect");
             try {
-                viewMain.connect(false);
+                viewMain.connect();
             } catch (MqttException ex) {
                 throw new RuntimeException(ex);
             }
         } else if (e.getActionCommand().equals("Disconnect")) {
             try {
-                viewMain.disconnect(false);
+                viewMain.disconnect();
             } catch (MqttException ex) {
                 throw new RuntimeException(ex);
             }
